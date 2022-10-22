@@ -10,5 +10,5 @@ We use the spatio-temporal fire data from https://ftp.wildfire.gov/.
 To download the dataset, run the following Python program:
 
 ```
-$ python3 download_fire_data.py
+$ python3 data/download/download_fire_data.py
 ```
