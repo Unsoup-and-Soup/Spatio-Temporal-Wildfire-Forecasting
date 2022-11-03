@@ -1,7 +1,5 @@
 */download/
-*/download/*
-*/workspace/
-*/workspace/*
+*/workspace*/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
