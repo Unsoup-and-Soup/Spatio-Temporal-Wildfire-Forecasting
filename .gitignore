@@ -1,3 +1,8 @@
+*/download/
+*/download/*
+*/workspace/
+*/workspace/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
