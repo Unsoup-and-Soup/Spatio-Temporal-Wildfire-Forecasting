@@ -15,13 +15,16 @@ Promise.all([d3.json("../data/California_Gridded.geojson")])
         ready(data[0]);
     })
 
-function ready(error, data) {
-    if (error) console.log(error);
-    console.log(data);
+function ready(data) {
+    // console.log(data);
+
     // adjust the projection to the features
-    projection.fitSize([width,height], data); 
+    projection.fitSize([width, height], data); 
 
     // draw the features
-    svg.append("path").attr("d", path(data));
-
+    svg.selectAll("path")
+      .data(data.features)
+      .enter()
+      .append("path")
+      .attr("d", path);
 }
