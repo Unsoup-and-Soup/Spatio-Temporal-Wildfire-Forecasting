@@ -9,7 +9,12 @@ var svg = d3.select("body")
 
 var projection = d3.geoMercator();
 var path = d3.geoPath().projection(projection);
-var allGrids;
+
+// flag for if a square is clicked
+var squareClicked = false;
+
+// stores the ID of the selected square
+var squareID = 0;
 
 // load the grid data
 Promise.all([d3.json("../data/California_Gridded.geojson")])
@@ -22,7 +27,7 @@ function ready(data) {
     projection.fitSize([width, height], data); 
 
     // draw the features
-    allGrids = svg.selectAll("path")
+    svg.selectAll("path")
       .data(data.features)
       .enter()
       .append("path")
@@ -31,14 +36,38 @@ function ready(data) {
 
       // on hovering over an area, highlight it
       .on("mouseover", mouseover)
-      .on("mouseout", mouseout);
+      .on("mouseout", mouseout)
+
+      // upon clicking a square, that square is frozen until it is re-clicked
+      .on("click", click);
 }
 
 function mouseover() {
-    svg.selectAll("path").style("opacity", "0.5");
-    d3.select(this).style("opacity", "1.0");
+    if (squareClicked === false) {
+        svg.selectAll("path").style("opacity", 0.5);
+        d3.select(this).style("opacity", 1.0);
+    }
 }
 
 function mouseout() {
-    svg.selectAll("path").style("opacity", "1.0");
+    if (squareClicked === false) {
+        svg.selectAll("path").style("opacity", 1.0);
+    }
+}
+
+function click(d) {
+    if (squareClicked === false) {
+        squareClicked = true;
+        squareID = d.properties.id;
+        svg.selectAll("path").style("opacity", 0.1);
+        d3.select(this).style("opacity", 1.0);
+
+        // zoom into clicked square and display to the right of the map
+    } else {
+        // reclick the square to unfreeze and select another square
+        if (squareID === d.properties.id) {
+            squareClicked = false;
+            svg.selectAll("path").style("opacity", 1.0);
+        }
+    }
 }
