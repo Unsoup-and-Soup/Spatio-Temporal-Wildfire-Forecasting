@@ -1,0 +1,11 @@
+.grid {
+    fill: grey;
+    stroke: black;
+    stroke-width: 0.1px;
+}
+
+.cell {
+    fill: transparent;
+    stroke: black;
+    stroke-width: 1px;
+}
