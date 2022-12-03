@@ -85,6 +85,29 @@ function click(d) {
     }
 }
 
+async function predictFire(gridData) {
+    input = gridData.map(row => row.map(d => d.selected ? 1 : 0)).flat()
+    input.push(0)
+    input.push(0)
+    console.log(input)
+
+    tensor_input = tf.tensor(input).reshape([1, 402])
+
+    model = await tf.loadLayersModel('../data/model/model.json')
+
+    predict = model.predict(tensor_input)
+    predict = predict.dataSync()
+    predict = Array.from(predict).map(d => +d)
+
+    output = []
+    while(predict.length) output.push(predict.splice(0, 20));
+    output = output.map(row => row.map(d => d > 0.5 ? true : false))
+
+    console.log(output)
+
+    return output
+}
+
 function displayGrid(squareData) {
     selectedSquare = squareData; // in case we need the location data
     var gridData = new Array();
@@ -158,31 +181,34 @@ function displayGrid(squareData) {
             // SEND IT OFF TO BALARAM
             // OUTPUT FROM BALARAM AS A 20x20 GRID
             // Below is a pseudo-output
-            var output = new Array();
-            for (var i=0; i<20; i++) { 
-                output.push(new Array());
-                for (var j=0; j<20; j++) {
-                    random = Math.random()
-                    if (random >= 0.5) {
-                        selected = true
-                    } else {
-                        selected = false
-                    }
-                    output[i].push(selected)
-                }
-            }
+            // var output = new Array();
+            // for (var i=0; i<20; i++) { 
+            //     output.push(new Array());
+            //     for (var j=0; j<20; j++) {
+            //         random = Math.random()
+            //         if (random >= 0.5) {
+            //             selected = true
+            //         } else {
+            //             selected = false
+            //         }
+            //         output[i].push(selected)
+            //     }
+            // }
 
-            // Update gridData with the output true/false values
-            for (var i=0; i<20; i++) {
-                for (var j=0; j<20; j++) {
-                    gridData[i][j]["selected"] = output[i][j]
-                    if (output[i][j]) {
-                        d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "red"}})
-                    } else {
-                        // d3.select(this).style("fill", "transparent")
+            predictFire(gridData)
+                .then((output) => {
+                    // Update gridData with the output true/false values
+                    for (var i=0; i<20; i++) {
+                        for (var j=0; j<20; j++) {
+                            gridData[i][j]["selected"] = output[i][j]
+                            if (output[i][j]) {
+                                d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "red"}})
+                            } else {
+                                // d3.select(this).style("fill", "transparent")
+                            }
+                        }
                     }
-                }
-            }
+                })
         })
 
         var txt = grid.append("text")
@@ -204,31 +230,34 @@ function displayGrid(squareData) {
                 // SEND IT OFF TO BALARAM
                 // OUTPUT FROM BALARAM AS A 20x20 GRID
                 // Below is a pseudo-output
-                var output = new Array();
-                for (var i=0; i<20; i++) { 
-                    output.push(new Array());
-                    for (var j=0; j<20; j++) {
-                        random = Math.random()
-                        if (random >= 0.5) {
-                            selected = true
-                        } else {
-                            selected = false
-                        }
-                        output[i].push(selected)
-                    }
-                }
+                // var output = new Array();
+                // for (var i=0; i<20; i++) { 
+                //     output.push(new Array());
+                //     for (var j=0; j<20; j++) {
+                //         random = Math.random()
+                //         if (random >= 0.5) {
+                //             selected = true
+                //         } else {
+                //             selected = false
+                //         }
+                //         output[i].push(selected)
+                //     }
+                // }
 
-                // Update gridData with the output true/false values
-                for (var i=0; i<20; i++) {
-                    for (var j=0; j<20; j++) {
-                        gridData[i][j]["selected"] = output[i][j]
-                        if (output[i][j]) {
-                            d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "red"}})
-                        } else {
-                            // d3.select(this).style("fill", "transparent")
-                        }
-                    }
-                }
+                predictFire(gridData)
+                    .then((output) => {
+                        // Update gridData with the output true/false values
+                        for (var i=0; i<20; i++) {
+                            for (var j=0; j<20; j++) {
+                                gridData[i][j]["selected"] = output[i][j]
+                                if (output[i][j]) {
+                                    d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "red"}})
+                                } else {
+                                    // d3.select(this).style("fill", "transparent")
+                                }
+                            }
+                        }   
+                    })
             })
 
         var rect = grid.append("rect")
