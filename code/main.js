@@ -277,7 +277,7 @@ function displayGrid(squareData) {
         .attr("x", 5)
         .attr("y", gridHeight-120)
         .attr("width", 100)
-        .attr("height", 100)
+        .attr("height", 40)
         .attr("rx", 6)
         .attr("ry", 6)
         .on("click", function(d) {
@@ -294,7 +294,7 @@ function displayGrid(squareData) {
         var txt = grid.append("text")
             .attr("class", "txt")
             .text("Submit")
-            .attr("y", gridHeight-104)
+            .attr("y", gridHeight-95)
             .attr("x", 28)
             .on("click", function(d) {
                 for (var i=0; i<numCells; i++) {
@@ -313,6 +313,8 @@ function displayGrid(squareData) {
             .attr("y", gridHeight-120)
             .attr("rx", 6)
             .attr("ry", 6)
+            .attr('width', 100)
+            .attr('height', 40)
             .on("click", function(d) {
                 for (var i=0; i<numCells; i++) {
                     for (var j=0; j<numCells; j++) {
@@ -326,7 +328,7 @@ function displayGrid(squareData) {
         var txt = grid.append("text")
             .attr("class", "txt")
             .text("Reset")
-            .attr("y", gridHeight-104)
+            .attr("y", gridHeight-95)
             .attr("x", 147)
             .on("click", function(d) {
                 for (var i=0; i<numCells; i++) {
@@ -345,8 +347,8 @@ function displayGrid(squareData) {
             .attr('class', 'legend-rect')
             .attr('x', gridWidth - 100)
             .attr('y', (d, i) => gridHeight - 30 * (4 - i))
-            .attr('width', 10)
-            .attr('height', 10)
+            .attr('width', 15)
+            .attr('height', 15)
             .attr('fill', d => d)
 
         grid.selectAll('.legend-txt')
@@ -354,8 +356,8 @@ function displayGrid(squareData) {
             .enter()
             .append('text')
             .attr('class', 'legend-txt')
-            .attr('x', gridWidth - 80)
-            .attr('y', (d, i) => gridHeight - 30 * (4 - i) + 9)
+            .attr('x', gridWidth - 77)
+            .attr('y', (d, i) => gridHeight - 30 * (4 - i) + 11)
             .text(d => d)
             .style('font-size', '10pt')
 }

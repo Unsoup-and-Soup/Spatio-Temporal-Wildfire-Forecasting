@@ -37,14 +37,10 @@ button {
 }
 
 .submit {
-	width: 100px;
-	height: 20px;
 	fill: #EC4E20;
 }
 
 .reset {
-	width: 100px;
-	height: 20px;
 	fill: #303A2B;
 }
 
