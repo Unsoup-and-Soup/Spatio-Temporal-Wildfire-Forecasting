@@ -2,8 +2,9 @@ const mapWidth = 500;
 const mapHeight = 500;
 const gridWidth = 450;
 const gridHeight = 450;
-const cellWidth = 20;
-const cellHeight = 20;
+const cellWidth = 10;
+const cellHeight = 10;
+const numCells = 40;
 var selectAll = false;
 var count = 0
 
@@ -86,12 +87,10 @@ function click(d) {
 }
 
 async function predictFire(gridData) {
-    input = gridData.map(row => row.map(d => d.selected ? 1 : 0)).flat()
-    input.push(0)
-    input.push(0)
+    input = gridData.map(row => row.map(d => d.selected ? 1 : 0))
     console.log(input)
 
-    tensor_input = tf.tensor(input).reshape([1, 402])
+    tensor_input = tf.tensor([input, input, input]).reshape([1, 3, numCells, numCells])
 
     model = await tf.loadLayersModel('../data/model/model.json')
 
@@ -99,9 +98,31 @@ async function predictFire(gridData) {
     predict = predict.dataSync()
     predict = Array.from(predict).map(d => +d)
 
+    day0 = gridData.map(row => row.map(d => d.selected))
+
+    day2 = []
+    while(predict.length > (numCells ** 2) * 2) day2.push(predict.splice(0, numCells))
+
+    day4 = []
+    while(predict.length > numCells ** 2) day4.push(predict.splice(0, numCells))
+
+    day6 = []
+    while(predict.length > 0) day6.push(predict.splice(0, numCells))
+    
+
     output = []
-    while(predict.length) output.push(predict.splice(0, 20));
-    output = output.map(row => row.map(d => d > 0.5 ? true : false))
+    for (i = 0; i < numCells; i++) {
+        row = []
+        for (j = 0; j < numCells; j++) {
+            row.push({
+                day0: day0[i][j],
+                day2: day2[i][j] > 0.5,
+                day4: day4[i][j] > 0.5,
+                day6:  day6[i][j] > 0.5
+            })
+        }
+        output.push(row)
+    }
 
     console.log(output)
 
@@ -117,9 +138,9 @@ function displayGrid(squareData) {
     var submitted = false
     
     // initialize each cell with its attributes
-    for (var row = 0; row < 20; row++) {
+    for (var row = 0; row < numCells; row++) {
         gridData.push(new Array());
-        for (var col = 0; col < 20; col++) {
+        for (var col = 0; col < numCells; col++) {
             gridData[row].push({
                 x: cellX,
                 y: cellY,
@@ -169,9 +190,9 @@ function displayGrid(squareData) {
         .attr("y", gridHeight-20)
         .on("click", function(d) {
             // console.log(gridData)
-            for (var i=0; i<20; i++) {
+            for (var i=0; i<numCells; i++) {
                 outputData.push(new Array());
-                for (var j=0; j<20; j++) {
+                for (var j=0; j<numCells; j++) {
                     var temp = gridData[i][j]["selected"]
                     outputData[i].push(temp)
                     // console.log(temp)
@@ -198,8 +219,8 @@ function displayGrid(squareData) {
             predictFire(gridData)
                 .then((output) => {
                     // Update gridData with the output true/false values
-                    for (var i=0; i<20; i++) {
-                        for (var j=0; j<20; j++) {
+                    for (var i=0; i<numCells; i++) {
+                        for (var j=0; j<numCells; j++) {
                             gridData[i][j]["selected"] = output[i][j]
                             if (output[i][j]) {
                                 d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "red"}})
@@ -218,9 +239,9 @@ function displayGrid(squareData) {
             .attr("x", 31)
             .on("click", function(d) {
                 // console.log(gridData)
-                for (var i=0; i<20; i++) {
+                for (var i=0; i<numCells; i++) {
                     outputData.push(new Array());
-                    for (var j=0; j<20; j++) {
+                    for (var j=0; j<numCells; j++) {
                         var temp = gridData[i][j]["selected"]
                         outputData[i].push(temp)
                         // console.log(temp)
@@ -247,8 +268,8 @@ function displayGrid(squareData) {
                 predictFire(gridData)
                     .then((output) => {
                         // Update gridData with the output true/false values
-                        for (var i=0; i<20; i++) {
-                            for (var j=0; j<20; j++) {
+                        for (var i=0; i<numCells; i++) {
+                            for (var j=0; j<numCells; j++) {
                                 gridData[i][j]["selected"] = output[i][j]
                                 if (output[i][j]) {
                                     d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "red"}})
@@ -266,8 +287,8 @@ function displayGrid(squareData) {
             .attr("x", 120)
             .attr("y", gridHeight-20)
             .on("click", function(d) {
-                for (var i=0; i<20; i++) {
-                    for (var j=0; j<20; j++) {
+                for (var i=0; i<numCells; i++) {
+                    for (var j=0; j<numCells; j++) {
                         gridData[i][j]["selected"] = false
                         d3.selectAll(".cell").style("fill", "transparent")
                     }
@@ -280,8 +301,8 @@ function displayGrid(squareData) {
             .attr("y", gridHeight-6)
             .attr("x", 155)
             .on("click", function(d) {
-                for (var i=0; i<20; i++) {
-                    for (var j=0; j<20; j++) {
+                for (var i=0; i<numCells; i++) {
+                    for (var j=0; j<numCells; j++) {
                         gridData[i][j]["selected"] = false
                         d3.selectAll(".cell").style("fill", "transparent")
                     }
