@@ -1,7 +1,21 @@
 body {
 	font-family: "Moncaco", monospace;
 	background-color: #ebdfdd;
-	margin: 50px 150px 100px 150px;
+	margin: 50px 10% 100px 10%;
+}
+
+@media only screen and (max-width: 1200px) {
+	body {
+		margin-left: 7%;
+		margin-right: 7%
+	}
+}
+
+@media only screen and (max-width: 900px) {
+	body {
+		margin-left: 3%;
+		margin-right: 3%
+	}
 }
 
 .grid {
@@ -13,7 +27,7 @@ body {
 .cell {
     fill: transparent;
     stroke: black;
-    stroke-width: 0.2px;
+    stroke-width: 0.1px;
 }
 
 .btn {
@@ -34,7 +48,7 @@ body {
 	/*opacity: 0.4;*/
 	/*border-color: black;*/
 	stroke: black;
-	strokeWidth: 3px;
+	stroke-width: 3px;
 }
 
 .reset {

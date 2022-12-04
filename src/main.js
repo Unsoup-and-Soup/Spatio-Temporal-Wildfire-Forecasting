@@ -1,16 +1,16 @@
 const mapWidth = 500;
 const mapHeight = 500;
-const gridWidth = 450;
-const gridHeight = 450;
-const cellWidth = 10;
-const cellHeight = 10;
+const gridWidth = 400;
+const gridHeight = 400;
 const numCells = 40;
+const cellWidth = (gridHeight - 50) / numCells;
+const cellHeight = (gridHeight - 50) / numCells;
 var selectAll = false;
 var firstRun = true;
 var count = 0
 
 // initialize svg
-var svg = d3.select("body")
+var svg = d3.select("#map")
   .append("svg")
   .attr("id", "main")
   .attr("width", mapWidth)
@@ -92,6 +92,7 @@ async function predictFire(gridData) {
     console.log(input)
 
     tensor_input = tf.tensor([input, input, input]).reshape([1, 3, numCells, numCells])
+    console.log(tensor_input)
 
     model = await tf.loadLayersModel('../data/model/model.json')
 
@@ -130,6 +131,57 @@ async function predictFire(gridData) {
     return output
 }
 
+function renderPredictedFires(gridData) {
+    predictFire(gridData)
+        .then((output) => {
+            // Update gridData with the output true/false values
+            for (var i=0; i<numCells; i++) {
+                for (var j=0; j<numCells; j++) {
+                    // console.log(output[i][j]["day0"])
+                    if (output[i][j]["day0"]) {
+                        // Light Green
+                        gridData[i][j]["selected"] = output[i][j]["day0"]
+                        // d3.selectAll(".cell").style("fill", "green")
+                        // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "#DFF1CD"}})
+                    } else if (output[i][j]["day2"]) {
+                        // Dark Red
+                        gridData[i][j]["day2"] = output[i][j]["day2"]
+                        // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "#de2d26"}})
+                    } else if (output[i][j]["day4"]) {
+                        // Salmon Color
+                        gridData[i][j]["day4"] = output[i][j]["day4"]
+                        // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "#fc9272"}})
+                    } else if (output[i][j]["day6"]) {
+                        // Light pink
+                        gridData[i][j]["day6"] = output[i][j]["day6"]
+                        // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "#fee0d2"}})
+                    } else {
+                        gridData[i][j]["selected"] = false
+                        gridData[i][j]["day2"] = false
+                        gridData[i][j]["day4"] = false
+                        gridData[i][j]["day6"] = false
+                        // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "transparent"}})
+                    }
+                }
+            }
+            
+            d3.selectAll(".cell").style("fill", function (d){
+                if(d.selected == true) {
+                    // return "#DFF1CD"
+                    return "#a50f15"
+                } else if (d.day2 == true) {
+                    return "#de2d26"
+                } else if (d.day4 == true) {
+                    return "#fb6a4a"
+                } else if (d.day6 == true) {
+                    return "#fcae91"
+                } else {
+                    return "transparent"
+                }
+            });
+        })
+}
+
 function displayGrid(squareData) {
     selectedSquare = squareData; // in case we need the location data
     var gridData = new Array();
@@ -159,7 +211,7 @@ function displayGrid(squareData) {
     }
     console.log(gridData)
     // draw the 40x40 grid
-    var grid = d3.select("body")
+    var grid = d3.select("#grid-map")
         .append("svg")
         .attr('class', 'displayWindow')
         .attr("id", "displayWindow")
@@ -168,6 +220,17 @@ function displayGrid(squareData) {
         .on("mousedown", function() {
             var svg = d3.select(this)
                 .classed("active", true);
+
+            if (firstRun) {
+                firstRun = false
+            } else {
+                for (var i=0; i<numCells; i++) {
+                    for (var j=0; j<numCells; j++) {
+                        gridData[i][j]["selected"] = gridData[i][j]["selected"] || gridData[i][j]["day2"] || gridData[i][j]["day4"] || gridData[i][j]["day6"]
+                    }
+                }
+                firstRun = true
+            }
 
             [x, y] = d3.mouse(svg.node())
             rooti = Math.floor(x / cellWidth)
@@ -193,14 +256,14 @@ function displayGrid(squareData) {
               k = 2
               for (ii = Math.max(i - k, 0); ii < Math.min(i + k, numCells); ii++) {
                 for (jj = Math.max(j - k, 0); jj < Math.min(j + k, numCells); jj++) {
-                    console.log(ii, jj, rooti, rootj)
+                    // console.log(ii, jj, rooti, rootj)
                     if (ii != rooti || jj != rootj) {
                         gridData[jj][ii].selected = gridData[rootj][rooti].selected
                     }
                 }
               }
 
-              cells.style('fill', d => { return d.selected ? 'red' : 'transparent' })
+              cells.style('fill', d => { return d.selected ? '#a50f15' : 'transparent' })
             }
           
             function mouseup() {
@@ -246,83 +309,8 @@ function displayGrid(squareData) {
                         // console.log(temp)
                     }
                 }
-                // console.log(outputData);
-                // SEND IT OFF TO BALARAM
-                // OUTPUT FROM BALARAM AS A 20x20 GRID
-                // Below is a pseudo-output
-                // var output = new Array();
-                // for (var i=0; i<20; i++) { 
-                //     output.push(new Array());
-                //     for (var j=0; j<20; j++) {
-                //         random = Math.random()
-                //         if (random >= 0.5) {
-                //             selected = true
-                //         } else {
-                //             selected = false
-                //         }
-                //         output[i].push(selected)
-                //     }
-                // }
 
-                if (firstRun) {
-                    firstRun = false
-                } else {
-                    for (var i=0; i<numCells; i++) {
-                        for (var j=0; j<numCells; j++) {
-                            gridData[i][j]["selected"] = gridData[i][j]["day6"]
-                            // gridData[i][j]["selected"] = gridData[i][j]["selected"] | gridData[i][j]["day2"] | gridData[i][j]["day4"] | gridData[i][j]["day6"]
-                        }
-                    }
-                }
-
-                predictFire(gridData)
-                    .then((output) => {
-                        // Update gridData with the output true/false values
-                        for (var i=0; i<numCells; i++) {
-                            for (var j=0; j<numCells; j++) {
-                                // console.log(output[i][j]["day0"])
-                                if (output[i][j]["day0"]) {
-                                    // Light Green
-                                    gridData[i][j]["selected"] = output[i][j]["day0"]
-                                    // d3.selectAll(".cell").style("fill", "green")
-                                    // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "#DFF1CD"}})
-                                } else if (output[i][j]["day2"]) {
-                                    // Dark Red
-                                    gridData[i][j]["day2"] = output[i][j]["day2"]
-                                    // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "#de2d26"}})
-                                } else if (output[i][j]["day4"]) {
-                                    // Salmon Color
-                                    gridData[i][j]["day4"] = output[i][j]["day4"]
-                                    // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "#fc9272"}})
-                                } else if (output[i][j]["day6"]) {
-                                    // Light pink
-                                    gridData[i][j]["day6"] = output[i][j]["day6"]
-                                    // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "#fee0d2"}})
-                                } else {
-                                    gridData[i][j]["selected"] = false
-                                    gridData[i][j]["day2"] = false
-                                    gridData[i][j]["day4"] = false
-                                    gridData[i][j]["day6"] = false
-                                    // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "transparent"}})
-                                }
-
-                                d3.selectAll(".cell").style("fill", function (d){
-                                    if(d.selected == true) {
-                                        // return "#DFF1CD"
-                                        return "#E4E300"
-                                    } else if (d.day2 == true) {
-                                        return "#de2d26"
-                                    } else if (d.day4 == true) {
-                                        return "#fc9272"
-                                    } else if (d.day6 == true) {
-                                        return "#fee0d2"
-                                    } else {
-                                        return "transparent"
-                                    }
-                                });
-                            }
-                        }   
-                    })
+                renderPredictedFires(gridData)
             })
 
         var txt = grid.append("text")
@@ -340,82 +328,8 @@ function displayGrid(squareData) {
                         // console.log(temp)
                     }
                 }
-                // console.log(outputData);
-                // SEND IT OFF TO BALARAM
-                // OUTPUT FROM BALARAM AS A 20x20 GRID
-                // Below is a pseudo-output
-                // var output = new Array();
-                // for (var i=0; i<20; i++) { 
-                //     output.push(new Array());
-                //     for (var j=0; j<20; j++) {
-                //         random = Math.random()
-                //         if (random >= 0.5) {
-                //             selected = true
-                //         } else {
-                //             selected = false
-                //         }
-                //         output[i].push(selected)
-                //     }
-                // }
 
-                if (firstRun) {
-                    firstRun = false
-                } else {
-                    for (var i=0; i<numCells; i++) {
-                        for (var j=0; j<numCells; j++) {
-                            gridData[i][j]["selected"] = gridData[i][j]["selected"] | gridData[i][j]["day2"] | gridData[i][j]["day4"] | gridData[i][j]["day6"]
-                        }
-                    }
-                }
-
-                predictFire(gridData)
-                    .then((output) => {
-                        // Update gridData with the output true/false values
-                        for (var i=0; i<numCells; i++) {
-                            for (var j=0; j<numCells; j++) {
-                                // console.log(output[i][j]["day0"])
-                                if (output[i][j]["day0"]) {
-                                    // Light Green
-                                    gridData[i][j]["selected"] = output[i][j]["day0"]
-                                    // d3.selectAll(".cell").style("fill", "green")
-                                    // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "#DFF1CD"}})
-                                } else if (output[i][j]["day2"]) {
-                                    // Dark Red
-                                    gridData[i][j]["day2"] = output[i][j]["day2"]
-                                    // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "#de2d26"}})
-                                } else if (output[i][j]["day4"]) {
-                                    // Salmon Color
-                                    gridData[i][j]["day4"] = output[i][j]["day4"]
-                                    // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "#fc9272"}})
-                                } else if (output[i][j]["day6"]) {
-                                    // Light pink
-                                    gridData[i][j]["day6"] = output[i][j]["day6"]
-                                    // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "#fee0d2"}})
-                                } else {
-                                    gridData[i][j]["selected"] = false
-                                    gridData[i][j]["day2"] = false
-                                    gridData[i][j]["day4"] = false
-                                    gridData[i][j]["day6"] = false
-                                    // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "transparent"}})
-                                }
-
-                                d3.selectAll(".cell").style("fill", function (d){
-                                    if(d.selected == true) {
-                                        // return "#DFF1CD"
-                                        return "#E4E300"
-                                    } else if (d.day2 == true) {
-                                        return "#de2d26"
-                                    } else if (d.day4 == true) {
-                                        return "#fc9272"
-                                    } else if (d.day6 == true) {
-                                        return "#fee0d2"
-                                    } else {
-                                        return "transparent"
-                                    }
-                                });
-                            }
-                        }   
-                    })
+                renderPredictedFires(gridData)
             })
 
         var rect = grid.append("rect")
@@ -427,9 +341,9 @@ function displayGrid(squareData) {
                 for (var i=0; i<numCells; i++) {
                     for (var j=0; j<numCells; j++) {
                         gridData[i][j]["selected"] = false
-                        d3.selectAll(".cell").style("fill", "transparent")
                     }
                 }
+                d3.selectAll(".cell").style("fill", "transparent")
                 firstRun = true
             })
 
@@ -442,9 +356,9 @@ function displayGrid(squareData) {
                 for (var i=0; i<numCells; i++) {
                     for (var j=0; j<numCells; j++) {
                         gridData[i][j]["selected"] = false
-                        d3.selectAll(".cell").style("fill", "transparent")
                     }
                 }
+                d3.selectAll(".cell").style("fill", "transparent")
                 firstRun = true
             })
 }
