@@ -1,6 +1,6 @@
 body {
 	font-family: "Moncaco", monospace;
-	background-color: #ebdfdd;
+	background-color: #E5FCF5;
 	margin: 50px 10% 100px 10%;
 }
 
@@ -39,15 +39,16 @@ button {
 .submit {
 	width: 100px;
 	height: 20px;
-	fill: #bae4b3;
+	fill: #EC4E20;
 }
 
 .reset {
 	width: 100px;
 	height: 20px;
-	fill: #edf8e9;
+	fill: #303A2B;
 }
 
 .txt {
 	font-size: 11pt;
+	fill: white;
 }

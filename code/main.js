@@ -1,10 +1,10 @@
 const mapWidth = 500;
 const mapHeight = 500;
 const gridWidth = 400;
-const gridHeight = 400;
+const gridHeight = 500;
 const numCells = 40;
 const cellWidth = (gridHeight - 50) / numCells;
-const cellHeight = (gridHeight - 50) / numCells;
+const cellHeight = (gridHeight - 150) / numCells;
 var selectAll = false;
 var firstRun = true;
 var count = 0
@@ -275,7 +275,7 @@ function displayGrid(squareData) {
     var rect = grid.append("rect")
         .attr("class", "submit")
         .attr("x", 5)
-        .attr("y", gridHeight-20)
+        .attr("y", gridHeight-120)
         .attr("width", 100)
         .attr("height", 100)
         .attr("rx", 6)
@@ -294,7 +294,7 @@ function displayGrid(squareData) {
         var txt = grid.append("text")
             .attr("class", "txt")
             .text("Submit")
-            .attr("y", gridHeight-4)
+            .attr("y", gridHeight-104)
             .attr("x", 28)
             .on("click", function(d) {
                 for (var i=0; i<numCells; i++) {
@@ -310,7 +310,7 @@ function displayGrid(squareData) {
         var rect = grid.append("rect")
             .attr("class", "reset")
             .attr("x", 120)
-            .attr("y", gridHeight-20)
+            .attr("y", gridHeight-120)
             .attr("rx", 6)
             .attr("ry", 6)
             .on("click", function(d) {
@@ -326,7 +326,7 @@ function displayGrid(squareData) {
         var txt = grid.append("text")
             .attr("class", "txt")
             .text("Reset")
-            .attr("y", gridHeight-4)
+            .attr("y", gridHeight-104)
             .attr("x", 147)
             .on("click", function(d) {
                 for (var i=0; i<numCells; i++) {
@@ -337,4 +337,25 @@ function displayGrid(squareData) {
                 d3.selectAll(".cell").style("fill", "transparent")
                 firstRun = true
             })
+
+        grid.selectAll('.legend-rect')
+            .data(["#a50f15", "#de2d26", "#fb6a4a", "#fcae91"])
+            .enter()
+            .append('rect')
+            .attr('class', 'legend-rect')
+            .attr('x', gridWidth - 100)
+            .attr('y', (d, i) => gridHeight - 30 * (4 - i))
+            .attr('width', 10)
+            .attr('height', 10)
+            .attr('fill', d => d)
+
+        grid.selectAll('.legend-txt')
+            .data(['Day 0', 'Day 2', 'Day 4', 'Day 6'])
+            .enter()
+            .append('text')
+            .attr('class', 'legend-txt')
+            .attr('x', gridWidth - 80)
+            .attr('y', (d, i) => gridHeight - 30 * (4 - i) + 9)
+            .text(d => d)
+            .style('font-size', '10pt')
 }
