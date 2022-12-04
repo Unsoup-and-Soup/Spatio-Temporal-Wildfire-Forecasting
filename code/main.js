@@ -53,6 +53,7 @@ function ready(data) {
       .on("click", click);
 }
 
+// when mouse is over the california map
 function mouseover() {
     if (!squareClicked) {
         svg.selectAll("path").style("opacity", 0.2);
@@ -60,12 +61,14 @@ function mouseover() {
     }
 }
 
+// when mouse leaves the california map
 function mouseout() {
     if (!squareClicked) {
         svg.selectAll("path").style("opacity", 1.0);
     }
 }
 
+// when mouse clicks on square on california map
 function click(d) {
     if (!squareClicked) {
         squareClicked = true;
@@ -87,6 +90,7 @@ function click(d) {
     }
 }
 
+// deployment of machine learning algorithm
 async function predictFire(gridData) {
     input = gridData.map(row => row.map(d => d.selected ? 1 : 0))
 
@@ -127,6 +131,8 @@ async function predictFire(gridData) {
     return output
 }
 
+
+// renders prediction data to the output grid
 function renderPredictedFires(gridData) {
     predictFire(gridData)
         .then((output) => {
@@ -172,8 +178,9 @@ function renderPredictedFires(gridData) {
     firstRun = false
 }
 
+// displays the fire perimeter zoomed grid for predicting fires
 function displayGrid(squareData) {
-    selectedSquare = squareData; // in case we need the location data
+    selectedSquare = squareData
     var gridData = new Array();
     var cellX = 1;
     var cellY = 1;
@@ -199,6 +206,7 @@ function displayGrid(squareData) {
         cellX = 1;
         cellY += cellHeight; 
     }
+
     // draw the 40x40 grid
     var grid = d3.select("#grid-map")
         .append("svg")
@@ -207,9 +215,12 @@ function displayGrid(squareData) {
         .attr("width", gridWidth)
         .attr("height", gridHeight+100)
         .on("mousedown", function() {
+            // tracks all the mousemovements on the grid to provide drag drawing features
+
             var svg = d3.select(this)
                 .classed("active", true);
 
+            // updates perimeter to latest predicted perimeter (on redraw)
             if (!firstRun) {
                 for (var i=0; i<numCells; i++) {
                     for (var j=0; j<numCells; j++) {
@@ -236,6 +247,7 @@ function displayGrid(squareData) {
           
             d3.event.preventDefault()
           
+            // is the mouse move function for the drag (colors in neighboring cells)
             function mousemove() {
               [x, y] = d3.mouse(svg.node())
               i = Math.floor(x / cellWidth)
@@ -257,6 +269,8 @@ function displayGrid(squareData) {
               w.on("mousemove", null).on("mouseup", null);
             }
           })
+
+    // rendering of the grid cells
     var rows = grid.selectAll(".row")
         .data(gridData)
         .enter()
@@ -272,7 +286,8 @@ function displayGrid(squareData) {
         .attr("width", function(d) { return d.cellWidth; })
         .attr("height", function(d) { return d.cellHeight; })
     
-    var rect = grid.append("rect")
+    // the submit button adn text
+    grid.append("rect")
         .attr("class", "submit")
         .attr("x", 5)
         .attr("y", gridHeight-120)
@@ -290,74 +305,73 @@ function displayGrid(squareData) {
 
                 renderPredictedFires(gridData)
             })
-
-        var txt = grid.append("text")
-            .attr("class", "txt")
-            .text("Submit")
-            .attr("y", gridHeight-95)
-            .attr("x", 28)
-            .on("click", function(d) {
-                for (var i=0; i<numCells; i++) {
-                    outputData.push(new Array());
-                    for (var j=0; j<numCells; j++) {
-                        outputData[i].push(gridData[i][j]["selected"])
-                    }
+    grid.append("text")
+        .attr("class", "txt")
+        .text("Submit")
+        .attr("y", gridHeight-95)
+        .attr("x", 28)
+        .on("click", function(d) {
+            for (var i=0; i<numCells; i++) {
+                outputData.push(new Array());
+                for (var j=0; j<numCells; j++) {
+                    outputData[i].push(gridData[i][j]["selected"])
                 }
+            }
 
-                renderPredictedFires(gridData)
-            })
+            renderPredictedFires(gridData)
+        })
 
-        var rect = grid.append("rect")
-            .attr("class", "reset")
-            .attr("x", 120)
-            .attr("y", gridHeight-120)
-            .attr("rx", 6)
-            .attr("ry", 6)
-            .attr('width', 100)
-            .attr('height', 40)
-            .on("click", function(d) {
-                for (var i=0; i<numCells; i++) {
-                    for (var j=0; j<numCells; j++) {
-                        gridData[i][j]["selected"] = false
-                    }
+    // the reset button and text
+    grid.append("rect")
+        .attr("class", "reset")
+        .attr("x", 120)
+        .attr("y", gridHeight-120)
+        .attr("rx", 6)
+        .attr("ry", 6)
+        .attr('width', 100)
+        .attr('height', 40)
+        .on("click", function(d) {
+            for (var i=0; i<numCells; i++) {
+                for (var j=0; j<numCells; j++) {
+                    gridData[i][j]["selected"] = false
                 }
-                d3.selectAll(".cell").style("fill", "transparent")
-                firstRun = true
-            })
-
-        var txt = grid.append("text")
-            .attr("class", "txt")
-            .text("Reset")
-            .attr("y", gridHeight-95)
-            .attr("x", 147)
-            .on("click", function(d) {
-                for (var i=0; i<numCells; i++) {
-                    for (var j=0; j<numCells; j++) {
-                        gridData[i][j]["selected"] = false
-                    }
+            }
+            d3.selectAll(".cell").style("fill", "transparent")
+            firstRun = true
+        })
+    grid.append("text")
+        .attr("class", "txt")
+        .text("Reset")
+        .attr("y", gridHeight-95)
+        .attr("x", 147)
+        .on("click", function(d) {
+            for (var i=0; i<numCells; i++) {
+                for (var j=0; j<numCells; j++) {
+                    gridData[i][j]["selected"] = false
                 }
-                d3.selectAll(".cell").style("fill", "transparent")
-                firstRun = true
-            })
+            }
+            d3.selectAll(".cell").style("fill", "transparent")
+            firstRun = true
+        })
 
-        grid.selectAll('.legend-rect')
-            .data(["#a50f15", "#de2d26", "#fb6a4a", "#fcae91"])
-            .enter()
-            .append('rect')
-            .attr('class', 'legend-rect')
-            .attr('x', gridWidth - 100)
-            .attr('y', (d, i) => gridHeight - 30 * (4 - i))
-            .attr('width', 15)
-            .attr('height', 15)
-            .attr('fill', d => d)
-
-        grid.selectAll('.legend-txt')
-            .data(['Day 0', 'Day 2', 'Day 4', 'Day 6'])
-            .enter()
-            .append('text')
-            .attr('class', 'legend-txt')
-            .attr('x', gridWidth - 77)
-            .attr('y', (d, i) => gridHeight - 30 * (4 - i) + 11)
-            .text(d => d)
-            .style('font-size', '10pt')
+    // legend entries
+    grid.selectAll('.legend-rect')
+        .data(["#a50f15", "#de2d26", "#fb6a4a", "#fcae91"])
+        .enter()
+        .append('rect')
+        .attr('class', 'legend-rect')
+        .attr('x', gridWidth - 100)
+        .attr('y', (d, i) => gridHeight - 30 * (4 - i))
+        .attr('width', 15)
+        .attr('height', 15)
+        .attr('fill', d => d)
+    grid.selectAll('.legend-txt')
+        .data(['Day 0', 'Day 2', 'Day 4', 'Day 6'])
+        .enter()
+        .append('text')
+        .attr('class', 'legend-txt')
+        .attr('x', gridWidth - 77)
+        .attr('y', (d, i) => gridHeight - 30 * (4 - i) + 11)
+        .text(d => d)
+        .style('font-size', '10pt')
 }
