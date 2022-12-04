@@ -54,7 +54,7 @@ function ready(data) {
 
 function mouseover() {
     if (!squareClicked) {
-        svg.selectAll("path").style("opacity", 0.5);
+        svg.selectAll("path").style("opacity", 0.2);
         d3.select(this).style("opacity", 1.0);
     }
 }
@@ -154,18 +154,62 @@ function displayGrid(squareData) {
         cellY += cellHeight; 
     }
     console.log(gridData)
-    // draw the 20x20 grid
+    // draw the 40x40 grid
     var grid = d3.select("body")
         .append("svg")
+        .attr('class', 'displayWindow')
         .attr("id", "displayWindow")
         .attr("width", gridWidth)
-        .attr("height", gridHeight+100);
+        .attr("height", gridHeight+100)
+        .on("mousedown", function() {
+            var svg = d3.select(this)
+                .classed("active", true);
+
+            [x, y] = d3.mouse(svg.node())
+            rooti = Math.floor(x / cellWidth)
+            rootj = Math.floor(y / cellHeight)
+
+            if (rooti >= numCells || rootj >= numCells) {
+                svg.classed("active", false);
+                return
+            }
+
+            gridData[rootj][rooti].selected = !gridData[rootj][rooti].selected
+          
+            var w = d3.select(window)
+                .on("mousemove", mousemove)
+                .on("mouseup", mouseup);
+          
+            d3.event.preventDefault()
+          
+            function mousemove() {
+              [x, y] = d3.mouse(svg.node())
+              i = Math.floor(x / cellWidth)
+              j = Math.floor(y / cellHeight)
+              k = 2
+              for (ii = Math.max(i - k, 0); ii < Math.min(i + k, numCells); ii++) {
+                for (jj = Math.max(j - k, 0); jj < Math.min(j + k, numCells); jj++) {
+                    console.log(ii, jj, rooti, rootj)
+                    if (ii != rooti || jj != rootj) {
+                        gridData[jj][ii].selected = gridData[rootj][rooti].selected
+                    }
+                }
+              }
+
+              cells.style('fill', d => { return d.selected ? 'red' : 'transparent' })
+            }
+          
+            function mouseup() {
+              svg.classed("active", false);
+              w.on("mousemove", null).on("mouseup", null);
+            }
+          })
     var rows = grid.selectAll(".row")
         .data(gridData)
         .enter()
         .append("g")
         .attr("class", "row");
-    rows.selectAll(".cell")
+    cells = rows.selectAll(".cell")
         .data(function(d) { return d; })
         .enter()
         .append("rect")
@@ -175,8 +219,8 @@ function displayGrid(squareData) {
         .attr("width", function(d) { return d.cellWidth; })
         .attr("height", function(d) { return d.cellHeight; })
         // .style("fill", function(d) {if(submitted == true) {d.fill = "red"}})
-        .on('click', onClickCell)
-        .on('mouseover', onMouseOver);
+        // .on('click', onClickCell)
+        // .on('mouseenter', onMouseOver);
     
     var rect = grid.append("rect")
         // .enter()

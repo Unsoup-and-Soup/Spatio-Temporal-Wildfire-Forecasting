@@ -1,3 +1,9 @@
+body {
+	font-family: "Moncaco", monospace;
+	background-color: #ebdfdd;
+	margin: 50px 150px 100px 150px;
+}
+
 .grid {
     fill: grey;
     stroke: black;
@@ -7,7 +13,7 @@
 .cell {
     fill: transparent;
     stroke: black;
-    stroke-width: 1px;
+    stroke-width: 0.2px;
 }
 
 .btn {
