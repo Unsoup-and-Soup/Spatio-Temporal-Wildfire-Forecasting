@@ -33,12 +33,12 @@ To install the application, first clone this repository. One only requires
 Python on their local system to execute the full application, and an
 internet connection is also not required as all JS libraries are downloaded.
 
-In the "code/data/" folder, there exist some data files which are necessary
+In the "CODE/data/" folder, there exist some data files which are necessary
 for the appplication, such as the California GeoJSON file. However, our
 training dataset is not present as it is extremely large. We discuss gaining
 and processing the data as we did at the end.
 
-In the "code/data/machine_learning/" folder, the "train_model.ipynb" notebook
+In the "CODE/data/machine_learning/" folder, the "train_model.ipynb" notebook
 contains the code for training the model given our dataset. There are previews
 in that code that display what the data looks like as a sample. We tested
 multiple models, so their model layouts and structures are included along with
@@ -46,14 +46,14 @@ the preview of some of the tests we performed. The final report details these
 experiments and evaluations. The required packages for the Python environment
 are listed in the "requirements.txt" of that folder.
 
-Lastly, the model is saved in the "code/data/model/" folder in the TensorflowJS
+Lastly, the model is saved in the "CODE/data/model/" folder in the TensorflowJS
 format. This is used by the application and should save any future iteration
 of the model.
 
 
 3 - EXECUTION
 
-After installing this application, navigate to this "code/" directory locally.
+After installing this application, navigate to this "CODE/" directory locally.
 In the terminal, run the following python command (for Python 3.x or higher)
 to create a HTTP web server:
 
@@ -70,7 +70,7 @@ A - DATA PROCESSING
 
 We first downloaded all the spatio-temporal fire data from the public NIFC
 server found at https://ftp.wildfire.gov/. The script for this process is in
-the "get_ftp_data.ipynb" in the "code/data/machine_learning/" folder. We
+the "get_ftp_data.ipynb" in the "CODE/data/machine_learning/" folder. We
 only utilize the GIS data which is curated after fires, whereas the IR data
 are heat perimeters which don't reflect the actual perimeter of the fire
 accurately (though these can be processed such that they label the perimeter).
