@@ -269,7 +269,8 @@ function displayGrid(squareData) {
                 } else {
                     for (var i=0; i<numCells; i++) {
                         for (var j=0; j<numCells; j++) {
-                            gridData[i][j]["selected"] = gridData[i][j]["selected"] | gridData[i][j]["day2"] | gridData[i][j]["day4"] | gridData[i][j]["day6"]
+                            gridData[i][j]["selected"] = gridData[i][j]["day6"]
+                            // gridData[i][j]["selected"] = gridData[i][j]["selected"] | gridData[i][j]["day2"] | gridData[i][j]["day4"] | gridData[i][j]["day6"]
                         }
                     }
                 }
