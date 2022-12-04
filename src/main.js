@@ -6,6 +6,7 @@ const cellWidth = 10;
 const cellHeight = 10;
 const numCells = 40;
 var selectAll = false;
+var firstRun = true;
 var count = 0
 
 // initialize svg
@@ -27,7 +28,7 @@ var squareID = 0;
 var selectedSquare;
 
 // load the map data
-Promise.all([d3.json("../data/California_Gridded.geojson")])
+Promise.all([d3.json("../data/California_Gridded_40x40.geojson")])
     .then(function(data) {
         ready(data[0]);
     });
@@ -146,7 +147,10 @@ function displayGrid(squareData) {
                 y: cellY,
                 cellWidth: cellWidth,
                 cellHeight: cellHeight,
-                selected: false
+                selected: false,
+                day2: false,
+                day4: false,
+                day6: false
             })
             cellX += cellWidth;
         }
@@ -220,7 +224,7 @@ function displayGrid(squareData) {
         .attr("height", function(d) { return d.cellHeight; })
         // .style("fill", function(d) {if(submitted == true) {d.fill = "red"}})
         // .on('click', onClickCell)
-        // .on('mouseenter', onMouseOver);
+        // .on('mouseover', onMouseOver);
     
     var rect = grid.append("rect")
         // .enter()
@@ -233,48 +237,93 @@ function displayGrid(squareData) {
         .attr("x", 0)
         .attr("y", gridHeight-20)
         .on("click", function(d) {
-            // console.log(gridData)
-            for (var i=0; i<numCells; i++) {
-                outputData.push(new Array());
-                for (var j=0; j<numCells; j++) {
-                    var temp = gridData[i][j]["selected"]
-                    outputData[i].push(temp)
-                    // console.log(temp)
+                // console.log(gridData)
+                for (var i=0; i<numCells; i++) {
+                    outputData.push(new Array());
+                    for (var j=0; j<numCells; j++) {
+                        var temp = gridData[i][j]["selected"]
+                        outputData[i].push(temp)
+                        // console.log(temp)
+                    }
                 }
-            }
-            // console.log(outputData);
-            // SEND IT OFF TO BALARAM
-            // OUTPUT FROM BALARAM AS A 20x20 GRID
-            // Below is a pseudo-output
-            // var output = new Array();
-            // for (var i=0; i<20; i++) { 
-            //     output.push(new Array());
-            //     for (var j=0; j<20; j++) {
-            //         random = Math.random()
-            //         if (random >= 0.5) {
-            //             selected = true
-            //         } else {
-            //             selected = false
-            //         }
-            //         output[i].push(selected)
-            //     }
-            // }
+                // console.log(outputData);
+                // SEND IT OFF TO BALARAM
+                // OUTPUT FROM BALARAM AS A 20x20 GRID
+                // Below is a pseudo-output
+                // var output = new Array();
+                // for (var i=0; i<20; i++) { 
+                //     output.push(new Array());
+                //     for (var j=0; j<20; j++) {
+                //         random = Math.random()
+                //         if (random >= 0.5) {
+                //             selected = true
+                //         } else {
+                //             selected = false
+                //         }
+                //         output[i].push(selected)
+                //     }
+                // }
 
-            predictFire(gridData)
-                .then((output) => {
-                    // Update gridData with the output true/false values
+                if (firstRun) {
+                    firstRun = false
+                } else {
                     for (var i=0; i<numCells; i++) {
                         for (var j=0; j<numCells; j++) {
-                            gridData[i][j]["selected"] = output[i][j]
-                            if (output[i][j]) {
-                                d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "red"}})
-                            } else {
-                                // d3.select(this).style("fill", "transparent")
-                            }
+                            gridData[i][j]["selected"] = gridData[i][j]["day6"]
+                            // gridData[i][j]["selected"] = gridData[i][j]["selected"] | gridData[i][j]["day2"] | gridData[i][j]["day4"] | gridData[i][j]["day6"]
                         }
                     }
-                })
-        })
+                }
+
+                predictFire(gridData)
+                    .then((output) => {
+                        // Update gridData with the output true/false values
+                        for (var i=0; i<numCells; i++) {
+                            for (var j=0; j<numCells; j++) {
+                                // console.log(output[i][j]["day0"])
+                                if (output[i][j]["day0"]) {
+                                    // Light Green
+                                    gridData[i][j]["selected"] = output[i][j]["day0"]
+                                    // d3.selectAll(".cell").style("fill", "green")
+                                    // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "#DFF1CD"}})
+                                } else if (output[i][j]["day2"]) {
+                                    // Dark Red
+                                    gridData[i][j]["day2"] = output[i][j]["day2"]
+                                    // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "#de2d26"}})
+                                } else if (output[i][j]["day4"]) {
+                                    // Salmon Color
+                                    gridData[i][j]["day4"] = output[i][j]["day4"]
+                                    // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "#fc9272"}})
+                                } else if (output[i][j]["day6"]) {
+                                    // Light pink
+                                    gridData[i][j]["day6"] = output[i][j]["day6"]
+                                    // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "#fee0d2"}})
+                                } else {
+                                    gridData[i][j]["selected"] = false
+                                    gridData[i][j]["day2"] = false
+                                    gridData[i][j]["day4"] = false
+                                    gridData[i][j]["day6"] = false
+                                    // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "transparent"}})
+                                }
+
+                                d3.selectAll(".cell").style("fill", function (d){
+                                    if(d.selected == true) {
+                                        // return "#DFF1CD"
+                                        return "#E4E300"
+                                    } else if (d.day2 == true) {
+                                        return "#de2d26"
+                                    } else if (d.day4 == true) {
+                                        return "#fc9272"
+                                    } else if (d.day6 == true) {
+                                        return "#fee0d2"
+                                    } else {
+                                        return "transparent"
+                                    }
+                                });
+                            }
+                        }   
+                    })
+            })
 
         var txt = grid.append("text")
             .attr("class", "txt")
@@ -309,17 +358,61 @@ function displayGrid(squareData) {
                 //     }
                 // }
 
+                if (firstRun) {
+                    firstRun = false
+                } else {
+                    for (var i=0; i<numCells; i++) {
+                        for (var j=0; j<numCells; j++) {
+                            gridData[i][j]["selected"] = gridData[i][j]["selected"] | gridData[i][j]["day2"] | gridData[i][j]["day4"] | gridData[i][j]["day6"]
+                        }
+                    }
+                }
+
                 predictFire(gridData)
                     .then((output) => {
                         // Update gridData with the output true/false values
                         for (var i=0; i<numCells; i++) {
                             for (var j=0; j<numCells; j++) {
-                                gridData[i][j]["selected"] = output[i][j]
-                                if (output[i][j]) {
-                                    d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "red"}})
+                                // console.log(output[i][j]["day0"])
+                                if (output[i][j]["day0"]) {
+                                    // Light Green
+                                    gridData[i][j]["selected"] = output[i][j]["day0"]
+                                    // d3.selectAll(".cell").style("fill", "green")
+                                    // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "#DFF1CD"}})
+                                } else if (output[i][j]["day2"]) {
+                                    // Dark Red
+                                    gridData[i][j]["day2"] = output[i][j]["day2"]
+                                    // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "#de2d26"}})
+                                } else if (output[i][j]["day4"]) {
+                                    // Salmon Color
+                                    gridData[i][j]["day4"] = output[i][j]["day4"]
+                                    // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "#fc9272"}})
+                                } else if (output[i][j]["day6"]) {
+                                    // Light pink
+                                    gridData[i][j]["day6"] = output[i][j]["day6"]
+                                    // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "#fee0d2"}})
                                 } else {
-                                    // d3.select(this).style("fill", "transparent")
+                                    gridData[i][j]["selected"] = false
+                                    gridData[i][j]["day2"] = false
+                                    gridData[i][j]["day4"] = false
+                                    gridData[i][j]["day6"] = false
+                                    // d3.selectAll(".cell").style("fill", function (d){if(d.selected == true){return "transparent"}})
                                 }
+
+                                d3.selectAll(".cell").style("fill", function (d){
+                                    if(d.selected == true) {
+                                        // return "#DFF1CD"
+                                        return "#E4E300"
+                                    } else if (d.day2 == true) {
+                                        return "#de2d26"
+                                    } else if (d.day4 == true) {
+                                        return "#fc9272"
+                                    } else if (d.day6 == true) {
+                                        return "#fee0d2"
+                                    } else {
+                                        return "transparent"
+                                    }
+                                });
                             }
                         }   
                     })
@@ -337,6 +430,7 @@ function displayGrid(squareData) {
                         d3.selectAll(".cell").style("fill", "transparent")
                     }
                 }
+                firstRun = true
             })
 
         var txt = grid.append("text")
@@ -351,6 +445,7 @@ function displayGrid(squareData) {
                         d3.selectAll(".cell").style("fill", "transparent")
                     }
                 }
+                firstRun = true
             })
 }
 
