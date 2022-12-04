@@ -1,0 +1,53 @@
+body {
+	font-family: "Moncaco", monospace;
+	background-color: #ebdfdd;
+	margin: 50px 10% 100px 10%;
+}
+
+@media only screen and (max-width: 1200px) {
+	body {
+		margin-left: 7%;
+		margin-right: 7%
+	}
+}
+
+@media only screen and (max-width: 900px) {
+	body {
+		margin-left: 3%;
+		margin-right: 3%
+	}
+}
+
+.grid {
+    fill: grey;
+    stroke: black;
+    stroke-width: 0.1px;
+}
+
+.cell {
+    fill: transparent;
+    stroke: black;
+    stroke-width: 0.1px;
+}
+
+button {
+	width: 100px;
+	height: 40px;
+	background: transparent;
+}
+
+.submit {
+	width: 100px;
+	height: 20px;
+	fill: #bae4b3;
+}
+
+.reset {
+	width: 100px;
+	height: 20px;
+	fill: #edf8e9;
+}
+
+.txt {
+	font-size: 11pt;
+}
