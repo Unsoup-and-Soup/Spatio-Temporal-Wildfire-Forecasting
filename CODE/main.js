@@ -269,6 +269,61 @@ function displayGrid(squareData) {
               w.on("mousemove", null).on("mouseup", null);
             }
           })
+          .on("touchstart", function() {
+            // tracks all the mousemovements on the grid to provide drag drawing features
+
+            var svg = d3.select(this)
+                .classed("active", true);
+
+            // updates perimeter to latest predicted perimeter (on redraw)
+            if (!firstRun) {
+                for (var i=0; i<numCells; i++) {
+                    for (var j=0; j<numCells; j++) {
+                        gridData[i][j]["selected"] = gridData[i][j]["selected"] || gridData[i][j]["day2"] || gridData[i][j]["day4"] || gridData[i][j]["day6"]
+                    }
+                }
+                firstRun = true
+            }
+
+            [x, y] = d3.mouse(svg.node())
+            rooti = Math.floor(x / cellWidth)
+            rootj = Math.floor(y / cellHeight)
+
+            if (rooti >= numCells || rootj >= numCells) {
+                svg.classed("active", false);
+                return
+            }
+
+            gridData[rootj][rooti].selected = !gridData[rootj][rooti].selected
+          
+            var w = d3.select(window)
+                .on("touchmove", mousemove)
+                .on("touchend", mouseup);
+          
+            d3.event.preventDefault()
+          
+            // is the mouse move function for the drag (colors in neighboring cells)
+            function mousemove() {
+              [x, y] = d3.mouse(svg.node())
+              i = Math.floor(x / cellWidth)
+              j = Math.floor(y / cellHeight)
+              k = 2
+              for (ii = Math.max(i - k, 0); ii < Math.min(i + k, numCells); ii++) {
+                for (jj = Math.max(j - k, 0); jj < Math.min(j + k, numCells); jj++) {
+                    if (ii != rooti || jj != rootj) {
+                        gridData[jj][ii].selected = gridData[rootj][rooti].selected
+                    }
+                }
+              }
+
+              cells.style('fill', d => { return d.selected ? '#a50f15' : 'transparent' })
+            }
+          
+            function mouseup() {
+              svg.classed("active", false);
+              w.on("mousemove", null).on("mouseup", null);
+            }
+          })
 
     // rendering of the grid cells
     var rows = grid.selectAll(".row")
