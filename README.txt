@@ -13,7 +13,7 @@ Unsoup and Soup Team:
     Shrey Patel
     Hui Min Tee
 
-LINK: https://unsoup-and-soup.github.io/project/
+LINK: https://unsoup-and-soup.github.io/Spatio-Temporal-Wildfire-Forecasting/
 
 1 - DESCRIPTION
 
